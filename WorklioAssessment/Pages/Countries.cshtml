@@ -1,0 +1,162 @@
+﻿@page
+@model WorklioAssessment.Pages.CountriesModel
+
+@{
+    ViewData["Title"] = "Countries";
+}
+@section Styles
+{
+    <style>
+        li.country a:hover {
+            text-decoration: underline !important
+        }
+    </style>
+}
+<div class="text-center">
+    <h1 class="display-4">@localizer["GoodDay"]</h1>
+    <h3 class="display-4">@localizer["ListOfCountries"]</h3>
+</div>
+<div style="padding:4px;">
+    <ol>
+        @foreach (var country in Model.Countries)
+        {
+            <li style="padding:2px;cursor:pointer;" class="country" id="@country.Cca3" data-toggle="modal" data-target="#detailsModal">
+                <a>
+                    Official Name - @country.Name.Official |
+                    <span style="color:dodgerblue;font-style:italic">Common Name - @country.Name.Common</span>
+                </a>
+            </li>
+        }
+    </ol>
+</div>
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="DetailsModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="DetailsModalTitle">Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="min-height:50vh;padding-top:40px;padding-bottom:40px;">
+                <div style="display:flex;flex-wrap:wrap;" id="body">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts
+{
+    <script>
+        let details;
+        let otherLanguageName = "";
+        $(".country").on("click", function () {
+            $("#body").html("<span style='font-style:italic;margin:auto;'>Loading....</span>");
+            let id = $(this).prop("id");
+            $.ajax({
+                type: "GET",
+                url: "?handler=Country",
+                data: {
+                    Id: id
+                },
+                success: function (data) {
+                    details = data;
+                    console.log(data)
+                    if (data != null) {
+                        let countryHtml = `
+                                <div style="flex:50%" id="countryDetails">
+                                        <div style="padding-bottom:40px;"><b>Default:</b> English</div>
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Offical Name:</b></span>${data.country.name.official}</div>
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Common Name:</b></span>${data.country.name.common}</div>
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Capital:</b></span>${data.country.capital}</div>
+                                </div>
+                                <div style="flex:50%">
+                                    <div style="padding-bottom:40px;">
+                                        <b>Choose Other Language:</b>
+                                        <select id="countrynamelanguage">
+                                            <option selected disabled value="">-- select a language</option>
+                                            <option value="germanName">German</option>
+                                            <option value="frenchName">French</option>
+                                            <option value="spanishName">Spanish</option>
+                                            <option value="japaneseName">Japanese</option>
+                                            <option value="italianName">Italian</option>
+                                        </select>
+                                    </div>
+                                    <div style="visibility:hidden;display:none;" class="germanName">
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Official Name:</b></span>${data.country.germanName.official}</div>
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Common Name:</b></span>${data.country.germanName.common}</div>
+                                    </div>
+                                    <div style="visibility:hidden;display:none;" class="frenchName">
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Official Name:</b></span>${data.country.frenchName.official}</div>
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Common Name:</b></span>${data.country.frenchName.common}</div>
+                                    </div>
+                                    <div style="visibility:hidden;display:none;" class="spanishName">
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Official Name:</b></span>${data.country.spanishName.official}</div>
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Common Name:</b></span>${data.country.spanishName.common}</div>
+                                    </div>
+                                    <div style="visibility:hidden;display:none;" class="japaneseName">
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Official Name:</b></span>${data.country.japaneseName.official}</div>
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Common Name:</b></span>${data.country.japaneseName.common}</div>
+                                    </div>
+                                    <div style="visibility:hidden;display:none;" class="italianName">
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Official Name:</b></span>${data.country.italianName.official}</div>
+                                        <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Common Name:</b></span>${data.country.italianName.common}</div>
+                                    </div>
+                                </div>`;
+                        let borderingCountriesHtml = "";
+                        data.borderingCountries.forEach(borderingCountry => {
+                            borderingCountriesHtml += `
+                                            <div style="flex:50%;padding-bottom: 20px;">
+                                                <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Offical Name:</b></span>${borderingCountry.name.official}</div>
+                                                <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Common Name:</b></span>${borderingCountry.name.common}</div>
+                                            </div>
+                                            <div style="flex:50%;padding-bottom: 20px;">
+                                                <div style="visibility:hidden;display:none;" class="germanName">
+                                                    <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Official Name:</b></span>${borderingCountry.germanName.official}</div>
+                                                    <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Common Name:</b></span>${borderingCountry.germanName.common}</div>
+                                                </div>
+                                                <div style="visibility:hidden;display:none;" class="frenchName">
+                                                    <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Official Name:</b></span>${borderingCountry.frenchName.official}</div>
+                                                    <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Common Name:</b></span>${borderingCountry.frenchName.common}</div>
+                                                </div>
+                                                <div style="visibility:hidden;display:none;" class="spanishName">
+                                                    <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Official Name:</b></span>${borderingCountry.spanishName.official}</div>
+                                                    <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Common Name:</b></span>${borderingCountry.spanishName.common}</div>
+                                                </div>
+                                                <div style="visibility:hidden;display:none;" class="japaneseName">
+                                                    <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Official Name:</b></span>${borderingCountry.japaneseName.official}</div>
+                                                    <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Common Name:</b></span>${borderingCountry.japaneseName.common}</div>
+                                                </div>
+                                                <div style="visibility:hidden;display:none;" class="italianName">
+                                                    <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Official Name:</b></span>${borderingCountry.italianName.official}</div>
+                                                    <div style="padding-bottom:10px;display:inline-flex;width:100%;"><span style="width:135px"><b>Common Name:</b></span>${borderingCountry.italianName.common}</div>
+                                                </div>
+                                            </div>`;
+                        });
+                        borderingCountriesHtml = `
+                                    <div style="display:flex;flex-basis:100%;flex-wrap:wrap;">
+                                           <div style="flex-basis:100%;padding-top:40px;padding-bottom:20px;">
+                                                <h4>Bordering Countries</h4>
+                                           </div>
+                                           ${borderingCountriesHtml}
+                                    </div>
+                                `
+                        $("#body").html(`
+                                      ${countryHtml}
+                                      ${borderingCountriesHtml}
+                                  `);
+                    }
+                },
+                error: function (e) {
+                    alert("nnkanbe")
+                }
+            });
+        });
+        $(document).on("change", "#countrynamelanguage", function () {
+            if (otherLanguageName != "") $("." + otherLanguageName).css({ "display": "none", "visibility": "hidden" });
+            otherLanguageName = $(this).val();
+            $("." + otherLanguageName).css({ "display": "block", "visibility": "visible" });
+        });
+    </script>
+}
